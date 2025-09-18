@@ -1,0 +1,1609 @@
+workout.html
+
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    <title>💪 운동 트래커</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+    
+    .app-header {
+        background: rgba(255, 255, 255, 0.98);
+        padding: 15px 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .app-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .week-indicator {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+    
+    .main-container {
+        padding: 15px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .session-selector {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .session-header {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .phase-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .phase-tab {
+        padding: 10px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        background: white;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .phase-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+    }
+    
+    .session-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    .session-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .session-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .session-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+    
+    .session-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-left: 4px solid #e5e7eb;
+        position: relative;
+    }
+    
+    .session-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .session-item:active {
+        transform: scale(0.98);
+    }
+    
+    .session-item.completed {
+        background: linear-gradient(to right, #f0fdf4, #dcfce7);
+        border-left-color: #10b981;
+    }
+    
+    .session-item.current {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-left-color: #fbbf24;
+        border-left-width: 6px;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+    
+    .session-item.next {
+        border-left-color: #fbbf24;
+        background: #fffbeb;
+    }
+    
+    .session-number {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #6366f1;
+        margin-right: 15px;
+        min-width: 30px;
+    }
+    
+    .session-item.completed .session-number {
+        color: #10b981;
+    }
+    
+    .session-item.current .session-number {
+        color: white;
+    }
+    
+    .session-details {
+        flex: 1;
+    }
+    
+    .session-name {
+        font-weight: 600;
+        font-size: 1em;
+        margin-bottom: 3px;
+    }
+    
+    .session-info {
+        font-size: 0.85em;
+        color: #666;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .session-item.current .session-info {
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .check-mark {
+        width: 24px;
+        height: 24px;
+        background: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+        margin-left: auto;
+    }
+    
+    .today-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .workout-header {
+        margin-bottom: 15px;
+    }
+    
+    .workout-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .workout-subtitle {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .exercise-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .exercise-item.completed {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .exercise-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .exercise-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1em;
+    }
+    
+    .exercise-weight {
+        color: #6366f1;
+        font-weight: 500;
+        font-size: 0.95em;
+    }
+    
+    .sets-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 8px;
+    }
+    
+    .set-input {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        font-size: 1em;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .set-input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .set-input.completed {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+    
+    .complete-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 1em;
+        font-weight: 600;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .complete-btn:active {
+        transform: scale(0.98);
+    }
+    
+    .complete-btn.completed {
+        background: #10b981;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+    
+    .stat-value {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-item {
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.3s;
+        border: none;
+        background: none;
+        color: #666;
+    }
+    
+    .nav-item.active {
+        color: #6366f1;
+    }
+    
+    .nav-item:active {
+        background: #f0f0f0;
+    }
+    
+    .nav-icon {
+        font-size: 1.3em;
+        margin-bottom: 2px;
+    }
+    
+    .nav-label {
+        font-size: 0.75em;
+        display: block;
+    }
+    
+    .progress-section {
+        padding: 15px;
+    }
+    
+    .progress-item {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .progress-title {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .progress-value {
+        color: #10b981;
+        font-weight: bold;
+    }
+    
+    .progress-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+        transition: width 0.5s;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state-text {
+        font-size: 1.1em;
+        color: #333;
+    }
+    
+    .timer {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+        margin-top: 10px;
+        display: none;
+    }
+    
+    .timer.active {
+        display: block;
+    }
+    
+    .timer-display {
+        font-size: 2em;
+        font-weight: bold;
+        color: #6366f1;
+    }
+    
+    .timer-label {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+    
+    .history-item {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .history-date {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+    
+    .history-workout {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .history-stats {
+        display: flex;
+        justify-content: space-around;
+        font-size: 0.9em;
+    }
+    
+    .history-stat {
+        text-align: center;
+    }
+    
+    .start-workout-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+        margin-top: 15px;
+    }
+    
+    .start-workout-btn:active {
+        transform: scale(0.98);
+    }
+    
+    .error-message {
+        background: #fef2f2;
+        color: #dc2626;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 10px 0;
+        text-align: center;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="app-header">
+        <div class="header-content">
+            <div class="app-title">💪 운동 트래커</div>
+            <div class="week-indicator" id="weekIndicator">Phase 1</div>
+        </div>
+    </div>
+
+```
+<div class="main-container" id="mainContainer">
+    <!-- 홈 섹션 -->
+    <div id="homeSection" class="section active">
+        <!-- 세션 선택 카드 -->
+        <div class="session-selector">
+            <div class="session-header">📅 운동 세션 선택</div>
+            
+            <div class="phase-tabs">
+                <div class="phase-tab active" onclick="selectPhase(1)">Phase 1 (1-4주)</div>
+                <div class="phase-tab" onclick="selectPhase(2)">Phase 2 (5-8주)</div>
+            </div>
+            
+            <div id="sessionList" class="session-list">
+                <!-- 동적으로 생성됨 -->
+            </div>
+            
+            <button class="start-workout-btn" id="startWorkoutBtn" onclick="startSelectedWorkout()">
+                운동 시작하기
+            </button>
+        </div>
+        
+        <!-- 오늘의 추천 -->
+        <div class="today-card">
+            <div class="workout-header">
+                <div class="workout-title">💡 오늘의 추천</div>
+                <div class="workout-subtitle" id="recommendText">마지막 운동 이후 휴식을 취했습니다</div>
+            </div>
+            <div id="recommendedSession" style="padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                <!-- 동적으로 생성됨 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 운동 섹션 -->
+    <div id="workoutSection" class="section" style="display: none;">
+        <!-- 동적으로 생성됨 -->
+    </div>
+    
+    <!-- 진도 섹션 -->
+    <div id="progressSection" class="section" style="display: none;">
+        <div class="progress-section">
+            <!-- 동적으로 생성됨 -->
+        </div>
+    </div>
+    
+    <!-- 기록 섹션 -->
+    <div id="historySection" class="section" style="display: none;">
+        <!-- 동적으로 생성됨 -->
+    </div>
+    
+    <!-- 설정 섹션 -->
+    <div id="settingsSection" class="section" style="display: none;">
+        <div class="today-card">
+            <h2 style="margin-bottom: 15px;">⚙️ 설정</h2>
+            <button class="complete-btn" onclick="exportData()">📥 데이터 내보내기</button>
+            <button class="complete-btn" style="background: #ef4444; margin-top: 10px;" onclick="resetData()">🗑️ 데이터 초기화</button>
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <p style="color: #666; font-size: 0.9em;">
+                    <strong>프로그램 정보</strong><br>
+                    Phase 1: 전신운동 (A/B/C)<br>
+                    Phase 2: 축분할 (전면/후면)<br>
+                    총 8주 프로그램
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <button class="nav-item active" onclick="showSection('home')">
+        <div class="nav-icon">🏠</div>
+        <span class="nav-label">홈</span>
+    </button>
+    <button class="nav-item" onclick="showSection('progress')">
+        <div class="nav-icon">📊</div>
+        <span class="nav-label">진도</span>
+    </button>
+    <button class="nav-item" onclick="showSection('history')">
+        <div class="nav-icon">📅</div>
+        <span class="nav-label">기록</span>
+    </button>
+    <button class="nav-item" onclick="showSection('settings')">
+        <div class="nav-icon">⚙️</div>
+        <span class="nav-label">설정</span>
+    </button>
+</div>
+
+<script>
+    // 에러 핸들러
+    window.addEventListener('error', function(event) {
+        console.error('Error caught:', event.error);
+        showError('오류가 발생했습니다. 페이지를 새로고침해주세요.');
+        event.preventDefault();
+    });
+    
+    // 전체 프로그램 구조
+    const program = {
+        phase1: {
+            sessions: [
+                '1', '2', '3', '4', '5', '6',  // 1-2주
+                '7', '8', '9', '10', '11', '12'   // 3-4주
+            ],
+            workouts: {
+                '1': {
+                    name: '세션 1 - 하체/가슴 중심',
+                    exercises: [
+                        { name: '스쿼트', sets: 3, reps: '8-10', weights: [40, 40, 45, 47.5], alt: '레그프레스' },
+                        { name: '벤치프레스', sets: 3, reps: '8-10', weights: [40, 40, 42.5, 45], alt: '체스트프레스 머신' },
+                        { name: '시티드 로우', sets: 3, reps: '10-12', weights: [30, 30, 32.5, 35], alt: '케이블 로우' },
+                        { name: '숄더프레스 머신', sets: 3, reps: '10', weights: [20, 20, 22.5, 25], alt: '덤벨 숄더프레스' },
+                        { name: '플랭크', sets: 3, reps: '30-45초', weights: [0, 0, 0, 0], alt: '데드버그' }
+                    ]
+                },
+                '2': {
+                    name: '세션 2 - 등/하체 후면',
+                    exercises: [
+                        { name: '데드리프트', sets: 3, reps: '5', weights: [50, 50, 55, 60], alt: '루마니안 데드리프트' },
+                        { name: '인클라인 덤벨프레스', sets: 3, reps: '10-12', weights: [12.5, 12.5, 15, 15], alt: '인클라인 체스트프레스 머신' },
+                        { name: '랫풀다운', sets: 3, reps: '10-12', weights: [30, 30, 35, 37.5], alt: '어시스트 풀업' },
+                        { name: '레그프레스', sets: 3, reps: '12-15', weights: [60, 60, 70, 80], alt: '핵스쿼트 머신' },
+                        { name: '페이스풀', sets: 3, reps: '15-20', weights: [5, 5, 7.5, 7.5], alt: '리버스 플라이 머신' }
+                    ]
+                },
+                '3': {
+                    name: '세션 3 - 전신 균형',
+                    exercises: [
+                        { name: '고블릿 스쿼트', sets: 3, reps: '10', weights: [16, 16, 20, 24], alt: '레그프레스' },
+                        { name: '덤벨 벤치프레스', sets: 3, reps: '10-12', weights: [12.5, 12.5, 15, 15], alt: '체스트프레스 머신' },
+                        { name: '케이블 로우', sets: 3, reps: '12-15', weights: [30, 30, 35, 37.5], alt: '머신 로우' },
+                        { name: '레그컬', sets: 3, reps: '12-15', weights: [20, 20, 25, 30], alt: '라잉 레그컬' },
+                        { name: '사이드 플랭크', sets: 3, reps: '20-30초', weights: [0, 0, 0, 0], alt: '러시안 트위스트' }
+                    ]
+                },
+                '4': {
+                    name: '세션 4 - 하체/가슴 중심',
+                    exercises: [
+                        { name: '스쿼트', sets: 3, reps: '8-10', weights: [40, 40, 45, 47.5], alt: '레그프레스' },
+                        { name: '벤치프레스', sets: 3, reps: '8-10', weights: [40, 40, 42.5, 45], alt: '체스트프레스 머신' },
+                        { name: '시티드 로우', sets: 3, reps: '10-12', weights: [30, 30, 32.5, 35], alt: '케이블 로우' },
+                        { name: '숄더프레스 머신', sets: 3, reps: '10', weights: [20, 20, 22.5, 25], alt: '덤벨 숄더프레스' },
+                        { name: '플랭크', sets: 3, reps: '30-45초', weights: [0, 0, 0, 0], alt: '데드버그' }
+                    ]
+                },
+                '5': {
+                    name: '세션 5 - 등/하체 후면',
+                    exercises: [
+                        { name: '데드리프트', sets: 3, reps: '5', weights: [50, 50, 55, 60], alt: '루마니안 데드리프트' },
+                        { name: '인클라인 덤벨프레스', sets: 3, reps: '10-12', weights: [12.5, 12.5, 15, 15], alt: '인클라인 체스트프레스 머신' },
+                        { name: '랫풀다운', sets: 3, reps: '10-12', weights: [30, 30, 35, 37.5], alt: '어시스트 풀업' },
+                        { name: '레그프레스', sets: 3, reps: '12-15', weights: [60, 60, 70, 80], alt: '핵스쿼트 머신' },
+                        { name: '페이스풀', sets: 3, reps: '15-20', weights: [5, 5, 7.5, 7.5], alt: '리버스 플라이 머신' }
+                    ]
+                },
+                '6': {
+                    name: '세션 6 - 전신 균형',
+                    exercises: [
+                        { name: '고블릿 스쿼트', sets: 3, reps: '10', weights: [16, 16, 20, 24], alt: '레그프레스' },
+                        { name: '덤벨 벤치프레스', sets: 3, reps: '10-12', weights: [12.5, 12.5, 15, 15], alt: '체스트프레스 머신' },
+                        { name: '케이블 로우', sets: 3, reps: '12-15', weights: [30, 30, 35, 37.5], alt: '머신 로우' },
+                        { name: '레그컬', sets: 3, reps: '12-15', weights: [20, 20, 25, 30], alt: '라잉 레그컬' },
+                        { name: '사이드 플랭크', sets: 3, reps: '20-30초', weights: [0, 0, 0, 0], alt: '러시안 트위스트' }
+                    ]
+                },
+                '7': {
+                    name: '세션 7 - 하체/가슴 중심',
+                    exercises: [
+                        { name: '스쿼트', sets: 3, reps: '8-10', weights: [45, 45, 47.5, 50], alt: '레그프레스' },
+                        { name: '벤치프레스', sets: 3, reps: '8-10', weights: [42.5, 42.5, 45, 47.5], alt: '체스트프레스 머신' },
+                        { name: '시티드 로우', sets: 3, reps: '10-12', weights: [32.5, 32.5, 35, 37.5], alt: '케이블 로우' },
+                        { name: '숄더프레스 머신', sets: 3, reps: '10', weights: [22.5, 22.5, 25, 27.5], alt: '덤벨 숄더프레스' },
+                        { name: '플랭크', sets: 3, reps: '45-60초', weights: [0, 0, 0, 0], alt: '데드버그' }
+                    ]
+                },
+                '8': {
+                    name: '세션 8 - 등/하체 후면',
+                    exercises: [
+                        { name: '데드리프트', sets: 3, reps: '5', weights: [55, 55, 60, 65], alt: '루마니안 데드리프트' },
+                        { name: '인클라인 덤벨프레스', sets: 3, reps: '10-12', weights: [15, 15, 17.5, 17.5], alt: '인클라인 체스트프레스 머신' },
+                        { name: '랫풀다운', sets: 3, reps: '10-12', weights: [35, 35, 37.5, 40], alt: '어시스트 풀업' },
+                        { name: '레그프레스', sets: 3, reps: '12-15', weights: [70, 70, 80, 90], alt: '핵스쿼트 머신' },
+                        { name: '페이스풀', sets: 3, reps: '15-20', weights: [7.5, 7.5, 10, 10], alt: '리버스 플라이 머신' }
+                    ]
+                },
+                '9': {
+                    name: '세션 9 - 전신 균형',
+                    exercises: [
+                        { name: '고블릿 스쿼트', sets: 3, reps: '10', weights: [20, 20, 24, 28], alt: '레그프레스' },
+                        { name: '덤벨 벤치프레스', sets: 3, reps: '10-12', weights: [15, 15, 17.5, 17.5], alt: '체스트프레스 머신' },
+                        { name: '케이블 로우', sets: 3, reps: '12-15', weights: [35, 35, 37.5, 40], alt: '머신 로우' },
+                        { name: '레그컬', sets: 3, reps: '12-15', weights: [25, 25, 30, 35], alt: '라잉 레그컬' },
+                        { name: '사이드 플랭크', sets: 3, reps: '30-40초', weights: [0, 0, 0, 0], alt: '러시안 트위스트' }
+                    ]
+                },
+                '10': {
+                    name: '세션 10 - 하체/가슴 중심',
+                    exercises: [
+                        { name: '스쿼트', sets: 3, reps: '8-10', weights: [47.5, 47.5, 50, 52.5], alt: '레그프레스' },
+                        { name: '벤치프레스', sets: 3, reps: '8-10', weights: [45, 45, 47.5, 50], alt: '체스트프레스 머신' },
+                        { name: '시티드 로우', sets: 3, reps: '10-12', weights: [35, 35, 37.5, 40], alt: '케이블 로우' },
+                        { name: '숄더프레스 머신', sets: 3, reps: '10', weights: [25, 25, 27.5, 30], alt: '덤벨 숄더프레스' },
+                        { name: '플랭크', sets: 3, reps: '45-60초', weights: [0, 0, 0, 0], alt: '데드버그' }
+                    ]
+                },
+                '11': {
+                    name: '세션 11 - 등/하체 후면',
+                    exercises: [
+                        { name: '데드리프트', sets: 3, reps: '5', weights: [60, 60, 65, 70], alt: '루마니안 데드리프트' },
+                        { name: '인클라인 덤벨프레스', sets: 3, reps: '10-12', weights: [15, 15, 17.5, 17.5], alt: '인클라인 체스트프레스 머신' },
+                        { name: '랫풀다운', sets: 3, reps: '10-12', weights: [37.5, 37.5, 40, 42.5], alt: '어시스트 풀업' },
+                        { name: '레그프레스', sets: 3, reps: '12-15', weights: [80, 80, 90, 100], alt: '핵스쿼트 머신' },
+                        { name: '페이스풀', sets: 3, reps: '15-20', weights: [7.5, 7.5, 10, 10], alt: '리버스 플라이 머신' }
+                    ]
+                },
+                '12': {
+                    name: '세션 12 - 전신 균형',
+                    exercises: [
+                        { name: '고블릿 스쿼트', sets: 3, reps: '10', weights: [24, 24, 28, 32], alt: '레그프레스' },
+                        { name: '덤벨 벤치프레스', sets: 3, reps: '10-12', weights: [15, 15, 17.5, 17.5], alt: '체스트프레스 머신' },
+                        { name: '케이블 로우', sets: 3, reps: '12-15', weights: [37.5, 37.5, 40, 42.5], alt: '머신 로우' },
+                        { name: '레그컬', sets: 3, reps: '12-15', weights: [30, 30, 35, 40], alt: '라잉 레그컬' },
+                        { name: '사이드 플랭크', sets: 3, reps: '30-40초', weights: [0, 0, 0, 0], alt: '러시안 트위스트' }
+                    ]
+                }
+            }
+        },
+        phase2: {
+            sessions: [
+                '13', '14', '15', '16',  // 5주
+                '17', '18', '19', '20',  // 6주
+                '21', '22', '23', '24',  // 7주
+                '25', '26', '27', '28'   // 8주
+            ],
+            workouts: {
+                '13': {
+                    name: '세션 13 - 전면일',
+                    exercises: [
+                        { name: '프론트 스쿼트', sets: 4, reps: '6-8', weights: [35, 40, 42.5, 45], alt: '핵스쿼트' },
+                        { name: '벤치프레스', sets: 4, reps: '6-8', weights: [45, 47.5, 50, 52.5], alt: '체스트프레스 머신' },
+                        { name: '레그 익스텐션', sets: 3, reps: '12-15', weights: [20, 25, 27.5, 30], alt: '시시 스쿼트' },
+                        { name: '펙덱 플라이', sets: 3, reps: '10-12', weights: [20, 25, 25, 30], alt: '케이블 플라이' },
+                        { name: '사이드 레터럴 레이즈', sets: 3, reps: '12-15', weights: [5, 7.5, 7.5, 10], alt: '머신 레터럴 레이즈' },
+                        { name: '케이블 크런치', sets: 3, reps: '15-20', weights: [20, 20, 25, 25], alt: '앱 휠' }
+                    ]
+                },
+                '14': {
+                    name: '세션 14 - 후면일',
+                    exercises: [
+                        { name: '데드리프트', sets: 4, reps: '5-6', weights: [60, 65, 70, 75], alt: '랙풀' },
+                        { name: '시티드 케이블 로우', sets: 4, reps: '8-10', weights: [35, 37.5, 40, 42.5], alt: '티바 로우' },
+                        { name: '레그 컬', sets: 3, reps: '12-15', weights: [15, 20, 22.5, 25], alt: '라잉 레그컬' },
+                        { name: '와이드그립 랫풀다운', sets: 3, reps: '10-12', weights: [37.5, 40, 42.5, 45], alt: '어시스트 풀업' },
+                        { name: '리버스 플라이 머신', sets: 3, reps: '15-20', weights: [15, 20, 20, 25], alt: '페이스풀' },
+                        { name: '시티드 카프레이즈', sets: 3, reps: '15-20', weights: [20, 25, 30, 30], alt: '스탠딩 카프레이즈' }
+                    ]
+                },
+                '15': {
+                    name: '세션 15 - 전면일',
+                    exercises: [
+                        { name: '프론트 스쿼트', sets: 4, reps: '6-8', weights: [35, 40, 42.5, 45], alt: '핵스쿼트' },
+                        { name: '벤치프레스', sets: 4, reps: '6-8', weights: [45, 47.5, 50, 52.5], alt: '체스트프레스 머신' },
+                        { name: '레그 익스텐션', sets: 3, reps: '12-15', weights: [20, 25, 27.5, 30], alt: '시시 스쿼트' },
+                        { name: '펙덱 플라이', sets: 3, reps: '10-12', weights: [20, 25, 25, 30], alt: '케이블 플라이' },
+                        { name: '사이드 레터럴 레이즈', sets: 3, reps: '12-15', weights: [5, 7.5, 7.5, 10], alt: '머신 레터럴 레이즈' },
+                        { name: '케이블 크런치', sets: 3, reps: '15-20', weights: [20, 20, 25, 25], alt: '앱 휠' }
+                    ]
+                },
+                '16': {
+                    name: '세션 16 - 후면일',
+                    exercises: [
+                        { name: '데드리프트', sets: 4, reps: '5-6', weights: [60, 65, 70, 75], alt: '랙풀' },
+                        { name: '시티드 케이블 로우', sets: 4, reps: '8-10', weights: [35, 37.5, 40, 42.5], alt: '티바 로우' },
+                        { name: '레그 컬', sets: 3, reps: '12-15', weights: [15, 20, 22.5, 25], alt: '라잉 레그컬' },
+                        { name: '와이드그립 랫풀다운', sets: 3, reps: '10-12', weights: [37.5, 40, 42.5, 45], alt: '어시스트 풀업' },
+                        { name: '리버스 플라이 머신', sets: 3, reps: '15-20', weights: [15, 20, 20, 25], alt: '페이스풀' },
+                        { name: '시티드 카프레이즈', sets: 3, reps: '15-20', weights: [20, 25, 30, 30], alt: '스탠딩 카프레이즈' }
+                    ]
+                },
+                '17': { name: '세션 17 - 전면일', exercises: [] },
+                '18': { name: '세션 18 - 후면일', exercises: [] },
+                '19': { name: '세션 19 - 전면일', exercises: [] },
+                '20': { name: '세션 20 - 후면일', exercises: [] },
+                '21': { name: '세션 21 - 전면일', exercises: [] },
+                '22': { name: '세션 22 - 후면일', exercises: [] },
+                '23': { name: '세션 23 - 전면일', exercises: [] },
+                '24': { name: '세션 24 - 후면일', exercises: [] },
+                '25': { name: '세션 25 - 전면일', exercises: [] },
+                '26': { name: '세션 26 - 후면일', exercises: [] },
+                '27': { name: '세션 27 - 전면일', exercises: [] },
+                '28': { name: '세션 28 - 후면일', exercises: [] }
+            }
+        }
+    };
+    
+    // 17-28 세션 채우기
+    for (let i = 17; i <= 28; i++) {
+        const isOdd = i % 2 === 1;
+        const weekIndex = Math.floor((i - 13) / 4);
+        
+        if (isOdd) {
+            // 전면일 (홀수)
+            program.phase2.workouts[i.toString()].exercises = [
+                { name: '프론트 스쿼트', sets: 4, reps: '6-8', weights: [40 + weekIndex * 2.5, 42.5 + weekIndex * 2.5, 45 + weekIndex * 2.5, 47.5 + weekIndex * 2.5], alt: '핵스쿼트' },
+                { name: '벤치프레스', sets: 4, reps: '6-8', weights: [47.5 + weekIndex * 2.5, 50 + weekIndex * 2.5, 52.5 + weekIndex * 2.5, 55 + weekIndex * 2.5], alt: '체스트프레스 머신' },
+                { name: '레그 익스텐션', sets: 3, reps: '12-15', weights: [25 + weekIndex * 2.5, 27.5 + weekIndex * 2.5, 30 + weekIndex * 2.5, 32.5 + weekIndex * 2.5], alt: '시시 스쿼트' },
+                { name: '펙덱 플라이', sets: 3, reps: '10-12', weights: [25, 27.5, 27.5, 30], alt: '케이블 플라이' },
+                { name: '사이드 레터럴 레이즈', sets: 3, reps: '12-15', weights: [7.5, 7.5, 10, 10], alt: '머신 레터럴 레이즈' },
+                { name: '케이블 크런치', sets: 3, reps: '15-20', weights: [25, 25, 30, 30], alt: '앱 휠' }
+            ];
+        } else {
+            // 후면일 (짝수)
+            program.phase2.workouts[i.toString()].exercises = [
+                { name: '데드리프트', sets: 4, reps: '5-6', weights: [65 + weekIndex * 5, 70 + weekIndex * 5, 75 + weekIndex * 5, 80 + weekIndex * 5], alt: '랙풀' },
+                { name: '시티드 케이블 로우', sets: 4, reps: '8-10', weights: [37.5 + weekIndex * 2.5, 40 + weekIndex * 2.5, 42.5 + weekIndex * 2.5, 45 + weekIndex * 2.5], alt: '티바 로우' },
+                { name: '레그 컬', sets: 3, reps: '12-15', weights: [20 + weekIndex * 2.5, 22.5 + weekIndex * 2.5, 25 + weekIndex * 2.5, 27.5 + weekIndex * 2.5], alt: '라잉 레그컬' },
+                { name: '와이드그립 랫풀다운', sets: 3, reps: '10-12', weights: [40 + weekIndex * 2.5, 42.5 + weekIndex * 2.5, 45 + weekIndex * 2.5, 47.5 + weekIndex * 2.5], alt: '어시스트 풀업' },
+                { name: '리버스 플라이 머신', sets: 3, reps: '15-20', weights: [20, 22.5, 22.5, 25], alt: '페이스풀' },
+                { name: '시티드 카프레이즈', sets: 3, reps: '15-20', weights: [25 + weekIndex * 5, 30 + weekIndex * 5, 35 + weekIndex * 5, 35 + weekIndex * 5], alt: '스탠딩 카프레이즈' }
+            ];
+        }
+    }
+    
+    // 로컬 스토리지 관리
+    const storage = {
+        save: function(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error('Storage save error:', e);
+            }
+        },
+        load: function(key, defaultValue = null) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (e) {
+                console.error('Storage load error:', e);
+                return defaultValue;
+            }
+        },
+        clear: function() {
+            if (confirm('모든 데이터가 삭제됩니다. 정말 초기화하시겠습니까?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    };
+    
+    // 앱 상태 관리
+    let appState = storage.load('appState', {
+        currentPhase: 1,
+        completedSessions: [],
+        currentSession: null,
+        workoutHistory: [],
+        startDate: new Date().toISOString().split('T')[0]
+    });
+    
+    // 데이터 무결성 체크
+    if (!appState) {
+        appState = {
+            currentPhase: 1,
+            completedSessions: [],
+            currentSession: null,
+            workoutHistory: [],
+            startDate: new Date().toISOString().split('T')[0]
+        };
+    }
+    if (!Array.isArray(appState.completedSessions)) appState.completedSessions = [];
+    if (!Array.isArray(appState.workoutHistory)) appState.workoutHistory = [];
+    
+    let selectedSession = null;
+    let currentWorkoutData = null;
+    
+    // 에러 표시
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        document.body.insertBefore(errorDiv, document.body.firstChild);
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
+    
+    // 세션 리스트 렌더링
+    function renderSessionList() {
+        try {
+            const container = document.getElementById('sessionList');
+            if (!container) return;
+            
+            const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+            if (!phase) return;
+            
+            // 다음 해야할 세션 찾기
+            let nextSessionIndex = -1;
+            for (let i = 0; i < phase.sessions.length; i++) {
+                const sessionKey = `phase${appState.currentPhase}_session${i}`;
+                if (!appState.completedSessions.includes(sessionKey)) {
+                    nextSessionIndex = i;
+                    break;
+                }
+            }
+            
+            let html = '';
+            phase.sessions.forEach((session, index) => {
+                const sessionKey = `phase${appState.currentPhase}_session${index}`;
+                const isCompleted = appState.completedSessions.includes(sessionKey);
+                const isCurrent = selectedSession === sessionKey;
+                const isNext = !isCompleted && index === nextSessionIndex;
+                
+                // 주차 계산
+                const weekNum = Math.floor(index / (appState.currentPhase === 1 ? 3 : 4)) + 1;
+                const weekOffset = appState.currentPhase === 1 ? 0 : 4;
+                
+                // 완료된 세션의 날짜 가져오기
+                const completedWorkout = appState.workoutHistory.find(w => w && w.sessionKey === sessionKey);
+                const dateText = completedWorkout ? 
+                    new Date(completedWorkout.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+                
+                // 운동 이름과 대체 운동 표시
+                const workout = phase.workouts[session];
+                const workoutName = workout ? workout.name : `세션 ${index + 1}`;
+                
+                html += `
+                    <div class="session-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isNext && !isCurrent ? 'next' : ''}" 
+                         onclick="selectSession('${sessionKey}', '${session}')">
+                        <div class="session-number">세션 ${index + 1}</div>
+                        <div class="session-details">
+                            <div class="session-name">${workoutName}</div>
+                            <div class="session-info">
+                                <span>${weekNum + weekOffset}주차</span>
+                                ${dateText ? `<span>완료: ${dateText}</span>` : ''}
+                            </div>
+                        </div>
+                        ${isCompleted ? '<div class="check-mark">✓</div>' : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('renderSessionList error:', error);
+        }
+    }
+    
+    // Phase 선택
+    function selectPhase(phase) {
+        try {
+            appState.currentPhase = phase;
+            storage.save('appState', appState);
+            
+            const phaseTabs = document.querySelectorAll('.phase-tab');
+            phaseTabs.forEach((tab, index) => {
+                if (tab) {
+                    if (index === phase - 1) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                }
+            });
+            
+            const weekIndicator = document.getElementById('weekIndicator');
+            if (weekIndicator) {
+                weekIndicator.textContent = `Phase ${phase}`;
+            }
+            
+            renderSessionList();
+            updateRecommendation();
+        } catch (error) {
+            console.error('selectPhase error:', error);
+        }
+    }
+    
+    // 세션 선택
+    function selectSession(sessionKey, sessionType) {
+        try {
+            selectedSession = sessionKey;
+            
+            const btn = document.getElementById('startWorkoutBtn');
+            if (!btn) return;
+            
+            const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+            const workoutName = phase.workouts[sessionType].name;
+            
+            if (appState.completedSessions.includes(sessionKey)) {
+                btn.textContent = `${workoutName} 다시하기`;
+                btn.style.background = '#10b981';
+            } else {
+                btn.textContent = `${workoutName} 시작하기`;
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+            
+            renderSessionList();
+        } catch (error) {
+            console.error('selectSession error:', error);
+        }
+    }
+    
+    // 추천 업데이트
+    function updateRecommendation() {
+        try {
+            const recommendText = document.getElementById('recommendText');
+            const recommendedSession = document.getElementById('recommendedSession');
+            
+            if (!recommendText || !recommendedSession) return;
+            
+            const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+            
+            // 다음 해야할 세션 찾기
+            let nextSessionIndex = -1;
+            for (let i = 0; i < phase.sessions.length; i++) {
+                const sessionKey = `phase${appState.currentPhase}_session${i}`;
+                if (!appState.completedSessions.includes(sessionKey)) {
+                    nextSessionIndex = i;
+                    break;
+                }
+            }
+            
+            if (nextSessionIndex === -1) {
+                recommendText.textContent = '모든 세션을 완료했습니다! 🎉';
+                recommendedSession.innerHTML = '<strong>Phase 완료!</strong>';
+                return;
+            }
+            
+            const nextSession = phase.sessions[nextSessionIndex];
+            const workoutName = phase.workouts[nextSession].name;
+            
+            // 마지막 운동 이후 경과일
+            if (appState.workoutHistory.length > 0) {
+                const lastWorkout = appState.workoutHistory[appState.workoutHistory.length - 1];
+                const lastDate = new Date(lastWorkout.date);
+                const today = new Date();
+                const daysDiff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff === 0) {
+                    recommendText.textContent = '오늘 이미 운동을 완료했습니다! 💪';
+                } else if (daysDiff === 1) {
+                    recommendText.textContent = '어제 운동 후 하루 휴식했습니다';
+                } else {
+                    recommendText.textContent = `마지막 운동 후 ${daysDiff}일 휴식했습니다`;
+                }
+            } else {
+                recommendText.textContent = '첫 운동을 시작해보세요!';
+            }
+            
+            recommendedSession.innerHTML = `
+                <strong>다음 추천: ${workoutName}</strong><br>
+                <span style="color: #666; font-size: 0.9em;">Phase ${appState.currentPhase} - ${nextSessionIndex + 1}번째 세션</span>
+            `;
+        } catch (error) {
+            console.error('updateRecommendation error:', error);
+        }
+    }
+    
+    // 선택한 운동 시작
+    function startSelectedWorkout() {
+        try {
+            if (!selectedSession) {
+                const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+                for (let i = 0; i < phase.sessions.length; i++) {
+                    const sessionKey = `phase${appState.currentPhase}_session${i}`;
+                    if (!appState.completedSessions.includes(sessionKey)) {
+                        selectedSession = sessionKey;
+                        startWorkout(phase.sessions[i], i);
+                        return;
+                    }
+                }
+                alert('모든 세션을 완료했습니다!');
+                return;
+            } else {
+                const match = selectedSession.match(/session(\d+)/);
+                if (!match) return;
+                const sessionIndex = parseInt(match[1]);
+                const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+                const sessionType = phase.sessions[sessionIndex];
+                startWorkout(sessionType, sessionIndex);
+            }
+        } catch (error) {
+            console.error('startSelectedWorkout error:', error);
+        }
+    }
+    
+    // 운동 시작
+    function startWorkout(sessionType, sessionIndex) {
+        try {
+            const phase = appState.currentPhase === 1 ? program.phase1 : program.phase2;
+            const workout = phase.workouts[sessionType];
+            const weekIndex = Math.floor(sessionIndex / (appState.currentPhase === 1 ? 3 : 4));
+            
+            currentWorkoutData = {
+                sessionKey: selectedSession,
+                sessionType: sessionType,
+                workout: workout,
+                weekIndex: weekIndex,
+                exercises: workout.exercises.map(ex => ({
+                    ...ex,
+                    weight: ex.weights[weekIndex],
+                    completedReps: []
+                }))
+            };
+            
+            renderWorkoutSection();
+            showSection('workout');
+        } catch (error) {
+            console.error('startWorkout error:', error);
+        }
+    }
+    
+    // 운동 섹션 렌더링
+    function renderWorkoutSection() {
+        try {
+            const section = document.getElementById('workoutSection');
+            if (!section || !currentWorkoutData) return;
+            
+            const data = currentWorkoutData;
+            
+            let html = `
+                <div class="today-card">
+                    <div class="workout-header">
+                        <div class="workout-title">${data.workout.name}</div>
+                        <div class="workout-subtitle">Phase ${appState.currentPhase} - Week ${data.weekIndex + 1}</div>
+                    </div>
+                    
+                    <div id="exerciseList">
+            `;
+            
+            data.exercises.forEach((exercise, index) => {
+                const altText = exercise.alt ? `(대체: ${exercise.alt})` : '';
+                
+                html += `
+                    <div class="exercise-item" id="exercise_${index}">
+                        <div class="exercise-header">
+                            <div>
+                                <div class="exercise-name">${exercise.name}</div>
+                                ${altText ? `<div style="font-size: 0.8em; color: #666; margin-top: 2px;">${altText}</div>` : ''}
+                            </div>
+                            <div class="exercise-weight">${exercise.weight}kg</div>
+                        </div>
+                        <div class="sets-container">
+                `;
+                
+                for (let i = 0; i < exercise.sets; i++) {
+                    html += `
+                        <input type="number" 
+                               class="set-input" 
+                               placeholder="${exercise.reps}"
+                               onchange="saveSet(${index}, ${i}, this.value)"
+                               id="set_${index}_${i}">
+                    `;
+                }
+                
+                html += `
+                        </div>
+                        <button class="complete-btn" 
+                                onclick="completeExercise(${index})">
+                            완료
+                        </button>
+                        <div class="timer" id="timer_${index}">
+                            <div class="timer-display" id="timerDisplay_${index}">00:00</div>
+                            <div class="timer-label">휴식 시간</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    
+                    <button class="complete-btn" style="background: #10b981; margin-top: 20px;" 
+                            onclick="finishWorkout()">
+                        운동 완료하기
+                    </button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">완료율</div>
+                        <div class="stat-value" id="completionRate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">총 볼륨</div>
+                        <div class="stat-value" id="totalVolume">0kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">운동 시간</div>
+                        <div class="stat-value" id="workoutTime">0분</div>
+                    </div>
+                </div>
+            `;
+            
+            section.innerHTML = html;
+        } catch (error) {
+            console.error('renderWorkoutSection error:', error);
+        }
+    }
+    
+    // 세트 저장
+    function saveSet(exerciseIndex, setIndex, value) {
+        try {
+            if (!currentWorkoutData) return;
+            
+            if (!currentWorkoutData.exercises[exerciseIndex].completedReps) {
+                currentWorkoutData.exercises[exerciseIndex].completedReps = [];
+            }
+            
+            currentWorkoutData.exercises[exerciseIndex].completedReps[setIndex] = parseInt(value) || 0;
+            
+            const input = document.getElementById(`set_${exerciseIndex}_${setIndex}`);
+            if (input) {
+                if (value) {
+                    input.classList.add('completed');
+                } else {
+                    input.classList.remove('completed');
+                }
+            }
+            
+            updateWorkoutStats();
+        } catch (error) {
+            console.error('saveSet error:', error);
+        }
+    }
+    
+    // 운동 완료
+    function completeExercise(exerciseIndex) {
+        try {
+            const exerciseItem = document.getElementById(`exercise_${exerciseIndex}`);
+            if (!exerciseItem) return;
+            
+            const completeBtn = exerciseItem.querySelector('.complete-btn');
+            
+            exerciseItem.classList.toggle('completed');
+            
+            if (exerciseItem.classList.contains('completed')) {
+                completeBtn.classList.add('completed');
+                completeBtn.textContent = '✓ 완료';
+                startRestTimer(exerciseIndex);
+            } else {
+                completeBtn.classList.remove('completed');
+                completeBtn.textContent = '완료';
+            }
+            
+            updateWorkoutStats();
+        } catch (error) {
+            console.error('completeExercise error:', error);
+        }
+    }
+    
+    // 휴식 타이머
+    let timers = {};
+    function startRestTimer(exerciseIndex) {
+        try {
+            const timerEl = document.getElementById(`timer_${exerciseIndex}`);
+            const displayEl = document.getElementById(`timerDisplay_${exerciseIndex}`);
+            
+            if (!timerEl || !displayEl) return;
+            
+            timerEl.classList.add('active');
+            
+            let seconds = 0;
+            if (timers[exerciseIndex]) {
+                clearInterval(timers[exerciseIndex]);
+            }
+            
+            timers[exerciseIndex] = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                displayEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (seconds >= 180) {
+                    displayEl.style.color = '#ef4444';
+                } else if (seconds >= 90) {
+                    displayEl.style.color = '#f59e0b';
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('startRestTimer error:', error);
+        }
+    }
+    
+    // 통계 업데이트
+    function updateWorkoutStats() {
+        try {
+            if (!currentWorkoutData) return;
+            
+            let completed = 0;
+            let totalVolume = 0;
+            
+            currentWorkoutData.exercises.forEach((exercise, index) => {
+                const exerciseEl = document.getElementById(`exercise_${index}`);
+                if (exerciseEl && exerciseEl.classList.contains('completed')) {
+                    completed++;
+                }
+                
+                if (exercise.completedReps) {
+                    const volume = exercise.completedReps.reduce((sum, reps) => sum + (reps * exercise.weight), 0);
+                    totalVolume += volume;
+                }
+            });
+            
+            const completionEl = document.getElementById('completionRate');
+            const volumeEl = document.getElementById('totalVolume');
+            
+            if (completionEl) {
+                completionEl.textContent = Math.round((completed / currentWorkoutData.exercises.length) * 100) + '%';
+            }
+            if (volumeEl) {
+                volumeEl.textContent = totalVolume + 'kg';
+            }
+        } catch (error) {
+            console.error('updateWorkoutStats error:', error);
+        }
+    }
+    
+    // 운동 종료
+    function finishWorkout() {
+        try {
+            if (!currentWorkoutData) return;
+            
+            const volumeEl = document.getElementById('totalVolume');
+            const totalVolume = volumeEl ? parseInt(volumeEl.textContent) : 0;
+            
+            const workoutRecord = {
+                sessionKey: currentWorkoutData.sessionKey,
+                sessionType: currentWorkoutData.sessionType,
+                date: new Date().toISOString(),
+                exercises: currentWorkoutData.exercises,
+                totalVolume: totalVolume
+            };
+            
+            appState.workoutHistory.push(workoutRecord);
+            
+            if (!appState.completedSessions.includes(currentWorkoutData.sessionKey)) {
+                appState.completedSessions.push(currentWorkoutData.sessionKey);
+            }
+            
+            storage.save('appState', appState);
+            
+            alert('운동이 완료되었습니다! 💪');
+            
+            currentWorkoutData = null;
+            selectedSession = null;
+            showSection('home');
+        } catch (error) {
+            console.error('finishWorkout error:', error);
+        }
+    }
+    
+    // 진도 섹션 렌더링
+    function renderProgressSection() {
+        try {
+            const section = document.querySelector('#progressSection .progress-section');
+            if (!section) return;
+            
+            const totalSessions = appState.currentPhase === 1 ? 12 : 16;
+            const completedCount = appState.completedSessions.filter(s => 
+                s.startsWith(`phase${appState.currentPhase}_`)
+            ).length;
+            const progressPercent = totalSessions > 0 ? (completedCount / totalSessions) * 100 : 0;
+            
+            let html = `
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <div class="progress-title">Phase ${appState.currentPhase} 진행률</div>
+                        <div class="progress-value">${completedCount}/${totalSessions} 세션</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                </div>
+            `;
+            
+            const recentLifts = {
+                '스쿼트': 0,
+                '벤치프레스': 0,
+                '데드리프트': 0
+            };
+            
+            if (appState.workoutHistory.length > 0) {
+                appState.workoutHistory.slice(-10).forEach(workout => {
+                    if (workout && workout.exercises) {
+                        workout.exercises.forEach(ex => {
+                            if (ex && ex.name && recentLifts.hasOwnProperty(ex.name)) {
+                                recentLifts[ex.name] = Math.max(recentLifts[ex.name], ex.weight || 0);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            Object.entries(recentLifts).forEach(([name, weight]) => {
+                const target = name === '스쿼트' ? 70 : name === '벤치프레스' ? 60 : 80;
+                const progress = target > 0 ? Math.min((weight / target) * 100, 100) : 0;
+                
+                html += `
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <div class="progress-title">${name}</div>
+                            <div class="progress-value">${weight}kg / ${target}kg</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            section.innerHTML = html;
+        } catch (error) {
+            console.error('renderProgressSection error:', error);
+        }
+    }
+    
+    // 기록 섹션 렌더링
+    function renderHistorySection() {
+        try {
+            const section = document.getElementById('historySection');
+            if (!section) return;
+            
+            if (appState.workoutHistory.length === 0) {
+                section.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <div class="empty-state-text">아직 운동 기록이 없습니다</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div style="padding: 15px;">';
+            
+            appState.workoutHistory.slice(-10).reverse().forEach(workout => {
+                if (!workout) return;
+                
+                const date = new Date(workout.date);
+                const dateStr = date.toLocaleDateString('ko-KR', { 
+                    month: 'long', day: 'numeric', weekday: 'short' 
+                });
+                
+                const phase = workout.sessionKey && workout.sessionKey.includes('phase1') ? program.phase1 : program.phase2;
+                const workoutName = phase.workouts[workout.sessionType] ? phase.workouts[workout.sessionType].name : '알 수 없음';
+                
+                html += `
+                    <div class="history-item">
+                        <div class="history-date">${dateStr}</div>
+                        <div class="history-workout">${workoutName}</div>
+                        <div class="history-stats">
+                            <div class="history-stat">
+                                <div style="color: #666;">운동 수</div>
+                                <div style="font-weight: bold;">${workout.exercises ? workout.exercises.length : 0}개</div>
+                            </div>
+                            <div class="history-stat">
+                                <div style="color: #666;">총 볼륨</div>
+                                <div style="font-weight: bold;">${workout.totalVolume || 0}kg</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            section.innerHTML = html;
+        } catch (error) {
+            console.error('renderHistorySection error:', error);
+        }
+    }
+    
+    // 섹션 전환
+    function showSection(sectionName) {
+        try {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(s => {
+                if (s) s.style.display = 'none';
+            });
+            
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(n => {
+                if (n) n.classList.remove('active');
+            });
+            
+            switch(sectionName) {
+                case 'home':
+                    const homeSection = document.getElementById('homeSection');
+                    if (homeSection) {
+                        homeSection.style.display = 'block';
+                    }
+                    if (navItems[0]) navItems[0].classList.add('active');
+                    renderSessionList();
+                    updateRecommendation();
+                    break;
+                case 'workout':
+                    const workoutSection = document.getElementById('workoutSection');
+                    if (workoutSection) {
+                        workoutSection.style.display = 'block';
+                    }
+                    break;
+                case 'progress':
+                    const progressSection = document.getElementById('progressSection');
+                    if (progressSection) {
+                        progressSection.style.display = 'block';
+                    }
+                    if (navItems[1]) navItems[1].classList.add('active');
+                    renderProgressSection();
+                    break;
+                case 'history':
+                    const historySection = document.getElementById('historySection');
+                    if (historySection) {
+                        historySection.style.display = 'block';
+                    }
+                    if (navItems[2]) navItems[2].classList.add('active');
+                    renderHistorySection();
+                    break;
+                case 'settings':
+                    const settingsSection = document.getElementById('settingsSection');
+                    if (settingsSection) {
+                        settingsSection.style.display = 'block';
+                    }
+                    if (navItems[3]) navItems[3].classList.add('active');
+                    break;
+            }
+        } catch (error) {
+            console.error('showSection error:', error);
+        }
+    }
+    
+    // 데이터 내보내기
+    function exportData() {
+        try {
+            const data = JSON.stringify(appState, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workout_data_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        } catch (error) {
+            console.error('exportData error:', error);
+            alert('데이터 내보내기 실패');
+        }
+    }
+    
+    // 데이터 초기화
+    function resetData() {
+        storage.clear();
+    }
+    
+    // 앱 초기화
+    function initApp() {
+        try {
+            storage.save('appState', appState);
+            selectPhase(appState.currentPhase || 1);
+        } catch (error) {
+            console.error('initApp error:', error);
+            showError('앱 초기화 중 오류가 발생했습니다.');
+        }
+    }
+    
+    // 페이지 로드 시 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            initApp();
+        } catch (error) {
+            console.error('DOMContentLoaded error:', error);
+        }
+    });
+</script>
+```
+
+</body>
+</html>
